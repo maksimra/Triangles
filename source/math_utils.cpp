@@ -21,6 +21,6 @@ namespace MathUtils
 
         double det_x = a2 * b3 - a3 * b2;
         double det_y = a3 * b1 - a1 * b3;
-        return std::make_pair<det_x / det, det_y / det>;
+        return std::make_pair(det_x / det, det_y / det);
     }
 };

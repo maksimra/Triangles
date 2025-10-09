@@ -8,4 +8,6 @@ int main()
         std::cerr << "Input error :(\n";
         return EXIT_FAILURE;
     }
+    
+    return EXIT_SUCCESS;
 }
