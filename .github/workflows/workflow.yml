@@ -1,0 +1,25 @@
+name: Triangles pre-commit and post-push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: Install google test and g++-12
+      run: sudo apt-get install -y libgtest-dev google-mock g++-12
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: CMake release config
+      run: cmake -S . -B build -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_BUILD_TYPE=Release
+    - name: CMake release build
+      run: cmake --build build
+    - name: CMake release test
+      run: build/tests/tests
