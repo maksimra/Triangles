@@ -17,6 +17,8 @@ enable_testing ()
 add_executable(
         tests
         tests.cpp
+        ../source/geometry.cpp
+        ../source/mathUtils.cpp
 )
 
 target_link_libraries(
@@ -24,8 +26,8 @@ target_link_libraries(
         GTest::gtest_main
 )
 
-target_include_directories (tree_tests PUBLIC ${PROJECT_SOURCE_DIR}
-                                              ${PROJECT_SOURCE_DIR}/include)
+target_include_directories (tests PUBLIC ${PROJECT_SOURCE_DIR}
+                                         ${PROJECT_SOURCE_DIR}/include)
 
 include (GoogleTest)
 

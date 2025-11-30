@@ -1,4 +1,5 @@
 add_executable (Triangles
+                geometry.cpp
                 mathUtils.cpp
                 main.cpp
 )

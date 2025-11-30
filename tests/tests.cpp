@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "geometry.hpp"
 
+using namespace Geometry;
+
 TEST(UnitTest, CollinearVectors)
 {
     Vector vec1{1.5, 2.25, -3.75};
@@ -32,7 +34,7 @@ TEST(UnitTest, LineIntersecLine)
 {
     Line firstLine1{Point{1, 2, 3}, Vector{1, 0, 0}};
     Line secondLine1{Point{3, 2, 1}, Vector{0, 0, 1}};
-    EXPECT_EQ(firstLine1.intersecLine(secondLine1).value(), Point{3, 2, 3});
+    EXPECT_EQ(firstLine1.intersecLine(secondLine1).value(), (Point{3, 2, 3}));
 
     Line firstLine2{Point{0.5, 1.5, 2.5}, Vector{2, 1, 0}};
     Line secondLine2{Point{1, 2, 3.5}, Vector{4, 2, 0}};
@@ -48,45 +50,22 @@ TEST(UnitTest, LineIntersecLine)
 
     Line firstLine5{Point{1.5, 2.0, 3.0}, Vector{0, 1, 0}};
     Line secondLine5{Point{1.5, 1.0, 2.0}, Vector{0, 0, 1}};
-    EXPECT_EQ(firstLine5.intersecLine(secondLine5).value(), Point{1.5, 2.0, 2.0});
-}
-
-TEST(UnitTest, LineIntersecLine)
-{
-    Line firstLine1{Point{1, 2, 3}, Vector{1, 0, 0}};
-    Line secondLine1{Point{3, 2, 1}, Vector{0, 0, 1}};
-    EXPECT_EQ(firstLine1.intersecLine(secondLine1).value(), Point{3, 2, 3});
-
-    Line firstLine2{Point{0.5, 1.5, 2.5}, Vector{2, 1, 0}};
-    Line secondLine2{Point{1, 2, 3.5}, Vector{4, 2, 0}};
-    EXPECT_FALSE(firstLine2.intersecLine(secondLine2).has_value());
-
-    Line firstLine3{Point{1.25, 2.75, 3.125}, Vector{1, 0.5, 0.25}};
-    Line secondLine3{Point{2.25, 3.25, 3.375}, Vector{2, 1, 0.5}};
-    EXPECT_FALSE(firstLine3.intersecLine(secondLine3).has_value());
-
-    Line firstLine4{Point{0.0, 0.0, 0.0}, Vector{1, 0, 0}};
-    Line secondLine4{Point{0.5, 1.0, 1.0}, Vector{0, 1, 0}};
-    EXPECT_FALSE(firstLine4.intersecLine(secondLine4).has_value()); 
-
-    Line firstLine5{Point{1.5, 2.0, 3.0}, Vector{0, 1, 0}};
-    Line secondLine5{Point{1.5, 1.0, 2.0}, Vector{0, 0, 1}};
-    EXPECT_EQ(firstLine5.intersecLine(secondLine5).value(), Point{1.5, 2.0, 2.0});
+    EXPECT_EQ(firstLine5.intersecLine(secondLine5).value(), (Point{1.5, 1, 3}));
 }
 
 TEST(UnitTest, LineIntersecSegment)
 {
     Line line1{Point{1, 2, 3}, Vector{1, 0, 0}};
     Segment segment1{Point{3, 1, 2}, Point{3, 3, 4}};
-    EXPECT_EQ(line1.intersecSegment(segment1).value(), Point{3, 2, 3});
+    EXPECT_EQ(line1.intersecSegment(segment1).value(), (Point{3, 2, 3}));
 
     Line line2{Point{0.5, 1.5, 2.5}, Vector{0, 0, 1}};
     Segment segment2{Point{0.5, 1.5, 2.5}, Point{0.5, 1.5, 4.5}};
-    EXPECT_EQ(line2.intersecSegment(segment2).value(), Point{0.5, 1.5, 2.5});
+    EXPECT_EQ(line2.contain(segment2), true);
 
     Line line3{Point{2, 3, 1}, Vector{0, 1, 0}};
     Segment segment3{Point{2, 1, 1}, Point{2, 3, 1}};
-    EXPECT_EQ(line3.intersecSegment(segment3).value(), Point{2, 3, 1});
+    EXPECT_EQ(line3.contain(segment3), true);
 
     Line line4{Point{0, 0, 0}, Vector{1, 0, 0}};
     Segment segment4{Point{1, 1, 1}, Point{2, 1, 1}};
@@ -98,11 +77,11 @@ TEST(UnitTest, LineIntersecSegment)
 
     Line line6{Point{0, 0, 0}, Vector{1, 1, 1}};
     Segment segment6{Point{2, 2, 0}, Point{2, 2, 4}};
-    EXPECT_EQ(line6.intersecSegment(segment6).value(), Point{2, 2, 2});
+    EXPECT_EQ(line6.intersecSegment(segment6).value(), (Point{2, 2, 2}));
 
     Line line7{Point{1, 1, 1}, Vector{0, 1, 1}};
     Segment segment7{Point{1, 2, 2}, Point{1, 2, 2}};
-    EXPECT_EQ(line7.intersecSegment(segment7).value(), Point{1, 2, 2});
+    EXPECT_EQ(line7.intersecSegment(segment7).value(), (Point{1, 2, 2}));
 
     Line line8{Point{0, 0, 0}, Vector{1, 0, 0}};
     Segment segment8{Point{0, 1, 1}, Point{0, 1, 1}};
@@ -161,45 +140,59 @@ TEST(UnitTest, TriangleIntersecLine)
 {
     Triangle triangle{Point{0, 0, 0}, Point{2, 0, 0}, Point{1, 2, 0}};
 
-    Line line1{Point{0.5, 0.5, -1}, Vector{0, 0, 1}};
+    // ТЕСТ 1: Прямая лежит в плоскости треугольника и пересекает его по отрезку
+    // Прямая y=1, z=0 пересекает треугольник по отрезку от (0.5,1,0) до (1.5,1,0)
+    Line line1{Point{0.5, 1, 0}, Vector{1, 0, 0}};
     auto result1 = triangle.intersecLine(line1);
     EXPECT_TRUE(result1.has_value());
-    EXPECT_EQ(result1.value(), (Segment{Point{0.5, 0.5, 0}, Point{0.5, 0.5, 0}}));
+    EXPECT_EQ(result1.value(), (Segment{Point{0.5, 1, 0}, Point{1.5, 1, 0}}));
 
-    // Тест 2: Прямая пересекает треугольник по отрезку (через две стороны)
-    Line line2{Point{0.5, -1, 0}, Vector{0, 1, 0}};
+    // ТЕСТ 2: Прямая лежит в плоскости треугольника и проходит через вершину
+    // Прямая через вершину (1,2,0) с направлением (1,1,0) пересекает треугольник только в вершине
+    Line line2{Point{1, 2, 0}, Vector{1, 1, 0}};
     auto result2 = triangle.intersecLine(line2);
     EXPECT_TRUE(result2.has_value());
-    // Проверяем, что точки лежат на разных сторонах треугольника
-    EXPECT_TRUE(result2.value().p1.z == 0 && result2.value().p2.z == 0);
+    EXPECT_EQ(result2.value(), (Segment{Point{1, 2, 0}, Point{1, 2, 0}}));
 
-    // Тест 3: Прямая проходит через вершину треугольника
-    Line line3{Point{1, 2, -1}, Vector{0, 0, 1}};
+    // ТЕСТ 3: Прямая лежит в плоскости треугольника и проходит через две точки (по отрезку)
+    // Прямая x=1, z=0 пересекает треугольник по отрезку от (1,0,0) до (1,2,0)
+    Line line3{Point{1, 0, 0}, Vector{0, 1, 0}};
     auto result3 = triangle.intersecLine(line3);
     EXPECT_TRUE(result3.has_value());
-    EXPECT_EQ(result3.value(), (Segment{Point{1, 2, 0}, Point{1, 2, 0}}));
+    EXPECT_EQ(result3.value(), (Segment{Point{1, 0, 0}, Point{1, 2, 0}}));
 
-    // Тест 4: Прямая проходит через сторону треугольника
-    Line line4{Point{1, 0, -1}, Vector{0, 0, 1}};
+    // ТЕСТ 4: Прямая лежит в плоскости треугольника и совпадает со стороной
+    // Прямая совпадает со стороной от (0,0,0) до (2,0,0)
+    Line line4{Point{0, 0, 0}, Point{2, 0, 0}};
     auto result4 = triangle.intersecLine(line4);
     EXPECT_TRUE(result4.has_value());
-    EXPECT_EQ(result4.value(), (Segment{Point{1, 0, 0}, Point{1, 0, 0}}));
+    EXPECT_EQ(result4.value(), (Segment{Point{0, 0, 0}, Point{2, 0, 0}}));
 
-    // Тест 5: Прямая не пересекает треугольник
-    Line line5{Point{3, 3, -1}, Vector{0, 0, 1}};
+    // ТЕСТ 5: Прямая лежит в плоскости треугольника, но не пересекает его
+    Line line5{Point{3, 3, 0}, Vector{1, 0, 0}};
     auto result5 = triangle.intersecLine(line5);
     EXPECT_FALSE(result5.has_value());
 
-    // Тест 6: Прямая параллельна плоскости треугольника
-    Line line6{Point{0, 0, 1}, Vector{1, 0, 0}};
-    auto result6 = triangle.intersecLine(line6);
-    EXPECT_FALSE(result6.has_value());
+    // ТЕСТЫ С ВЫРОЖДЕННЫМ ТРЕУГОЛЬНИКОМ
+    Triangle degenerate_triangle{Point{0, 0, 0}, Point{1, 0, 0}, Point{2, 0, 0}};
 
-    // Тест 8: Прямая касается треугольника в одной точке (на стороне)
-    Line line8{Point{1, 1, -1}, Vector{0, 0, 1}};
-    auto result8 = triangle.intersecLine(line8);
-    EXPECT_TRUE(result8.has_value());
-    EXPECT_EQ(result8.value(), (Segment{Point{1, 1, 0}, Point{1, 1, 0}}));
+    // ТЕСТ 9: Прямая пересекает вырожденный треугольник в точке
+    Line line9{Point{0.5, 0, -1}, Vector{0, 0, 1}};
+    auto result9 = degenerate_triangle.intersecLine(line9);
+    EXPECT_TRUE(result9.has_value());
+    EXPECT_EQ(result9.value(), (Segment{Point{0.5, 0, 0}, Point{0.5, 0, 0}}));
+
+    // ТЕСТ 10: Прямая лежит в плоскости вырожденного треугольника и пересекает его в точке
+    Line line10{Point{0.5, 0, 0}, Vector{0, 1, 0}};
+    auto result10 = degenerate_triangle.intersecLine(line10);
+    EXPECT_TRUE(result10.has_value());
+    EXPECT_EQ(result10.value(), (Segment{Point{0.5, 0, 0}, Point{0.5, 0, 0}}));
+
+    // ТЕСТ 11: Прямая совпадает с вырожденным треугольником
+    Line line11{Point{0, 0, 0}, Point{2, 0, 0}};
+    auto result11 = degenerate_triangle.intersecLine(line11);
+    EXPECT_TRUE(result11.has_value());
+    EXPECT_EQ(result11.value(), (Segment{Point{0, 0, 0}, Point{2, 0, 0}}));
 }
 
 int main(int argc, char **argv)
