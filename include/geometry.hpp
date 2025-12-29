@@ -34,6 +34,8 @@ namespace Geometry
         
         bool isNull() const;
 
+        double squareLength() const;
+
         double length() const;
         
         Vector cross(const Vector &other) const;
@@ -44,9 +46,14 @@ namespace Geometry
         
         bool collinear(const Vector &other) const;
 
+        Vector operator/(double num) const
+        {
+            return Vector{x / num, y / num, z / num};
+        }
+
         operator MathUtils::Vector3() const
         {
-            return Vector3{x, y, z};
+            return MathUtils::Vector3{x, y, z};
         }
     };
     
@@ -59,6 +66,8 @@ namespace Geometry
         
         bool isDegenerate() const;
 
+        double squareLength() const;
+
         double length() const;
 
         bool operator==(const Segment& other) const;
@@ -66,6 +75,10 @@ namespace Geometry
         bool contain(const Point &p) const;
 
         static Segment maxLengthSegment(const Segment &seg1, const Segment &seg2, const Segment &seg3);
+
+        static bool checkIntersection(const Segment &seg1, const Segment &seg2);
+
+        static bool checkIntersectionOnSameLine(const Segment &seg1, const Segment &seg2);
     };
 
     struct Line
@@ -81,7 +94,7 @@ namespace Geometry
               point(p), direction(v) {}
         
         Line(const Segment &seg) :
-             point(seg.p1), direction(seg.p2, seg.p1) {}
+             point(seg.p1), direction(seg.p1, seg.p2) {}
             
         bool operator==(const Line &other) const;
 
@@ -158,6 +171,10 @@ namespace Geometry
                  p1(p1_), p2(p2_), p3(p3_) {} 
                  
         Type getType() const;
+
+        static bool checkIntersection(const Triangle &t, const Point &p);
+
+        static bool checkIntersection(const Triangle &t, const Segment &seg);
 
         // Requirements: seg is not degenerate
         bool checkIntersection(const Segment &seg) const;

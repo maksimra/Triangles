@@ -5,7 +5,9 @@
 
 namespace MathUtils
 {
-    bool isZero(double number);
+    const double EPS = 1e-8;
+
+    bool isZero(double number, double scale);
 
     // a1 * x + a2 * y + a3 = 0
     // b1 * x + b2 * y + b3 = 0

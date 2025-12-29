@@ -14,21 +14,47 @@ endif ()
 
 enable_testing ()
 
+#------------------------------------------------
+
 add_executable(
-        tests
-        tests.cpp
+        unitTests
+        unitTests.cpp
         ../source/geometry.cpp
         ../source/mathUtils.cpp
 )
 
 target_link_libraries(
-        tests
+        unitTests
         GTest::gtest_main
 )
 
-target_include_directories (tests PUBLIC ${PROJECT_SOURCE_DIR}
+target_include_directories (unitTests PUBLIC ${PROJECT_SOURCE_DIR}
                                          ${PROJECT_SOURCE_DIR}/include)
+
+gtest_discover_tests (unitTests)
+
+#------------------------------------------------
+
+add_executable(
+        e2eTests
+        e2eTests.cpp
+        ../source/geometry.cpp
+        ../source/mathUtils.cpp
+)
+
+target_link_libraries(
+        e2eTests
+        GTest::gtest_main
+)
+
+target_include_directories (e2eTests PUBLIC ${PROJECT_SOURCE_DIR}
+                                            ${PROJECT_SOURCE_DIR}/include)
+
+gtest_discover_tests (e2eTests)
+
+#------------------------------------------------
 
 include (GoogleTest)
 
-gtest_discover_tests (tests)
+
+
