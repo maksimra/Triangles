@@ -21,5 +21,7 @@ jobs:
       run: cmake -S . -B build -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_BUILD_TYPE=Release
     - name: CMake release build
       run: cmake --build build
-    - name: CMake release test
-      run: build/tests/tests
+    - name: Unit tests
+      run: build/tests/unitTests
+    - name: End to end tests
+      run: build/tests/e2eTests
