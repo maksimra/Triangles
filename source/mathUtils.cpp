@@ -6,7 +6,7 @@
 
 namespace MathUtils {
 bool isZero(double number, double scale) {
-  return std::abs(number) <= EPS * scale;
+  return std::abs(number) <= EPS * std::abs(scale);
 }
 
 bool nearEq(double a, double b, double absEps = 1e-12, double relEps = 1e-9) {

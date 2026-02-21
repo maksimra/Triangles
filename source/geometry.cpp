@@ -5,9 +5,9 @@
 
 namespace Geometry {
 bool Point::operator==(const Point &rhs) const {
-  return MathUtils::isZero(x - rhs.x, x + rhs.x) &&
-         MathUtils::isZero(y - rhs.y, y + rhs.y) &&
-         MathUtils::isZero(z - rhs.z, z + rhs.z);
+  return MathUtils::isZero(x - rhs.x, std::abs(x) + std::abs(rhs.x)) &&
+         MathUtils::isZero(y - rhs.y, std::abs(y) + std::abs(rhs.y)) &&
+         MathUtils::isZero(z - rhs.z, std::abs(z) + std::abs(rhs.z));
 }
 
 bool Vector::isNull() const {
@@ -194,8 +194,8 @@ std::optional<Point> Line::getIntersection(const Segment &seg) const {
   double segVecLength = segVector.length();
 
   if (MathUtils::isZero(suppVector * segVector - suppVecLength * segVecLength,
-                        suppVector * segVector +
-                            suppVecLength * segVecLength) &&
+                        std::abs(suppVector * segVector) +
+                            std::abs(suppVecLength * segVecLength)) &&
       suppVecLength <= segVecLength)
     return pointCandidate;
 
@@ -226,37 +226,28 @@ bool Plane::operator==(const Plane &other) const {
 
   if (!MathUtils::isZero(A, A))
     return MathUtils::isZero(A * other.D - other.A * D,
-                             A * other.D + other.A * D);
+                             std::abs(A * other.D) + std::abs(other.A * D));
   if (!MathUtils::isZero(B, B))
     return MathUtils::isZero(B * other.D - other.B * D,
-                             B * other.D + other.B * D);
+                             std::abs(B * other.D) + std::abs(other.B * D));
   if (!MathUtils::isZero(C, C))
     return MathUtils::isZero(C * other.D - other.C * D,
-                             C * other.D + other.C * D);
+                             std::abs(C * other.D) + std::abs(other.C * D));
 
   assert(false && "Degenerate plane found.\n");
 }
-
-/*bool Plane::contain(const Point &p) const
-{
-    double num = A * p.x + B * p.y + C * p.z + D;
-    return std::abs(num) <= MathUtils::EPS * normal.length();
-}*/
 
 bool Plane::contain(const Point &p) const {
   double num = A * p.x + B * p.y + C * p.z + D;
   double scale = normal.length() * Vector{p}.length();
   return std::abs(num) <= MathUtils::EPS * scale;
-
-  /*return MathUtils::isZero(A * p.x + B * p.y + C * p.z + D,
-                           Vector{p}.length() * (A + B + C) / 3);*/
 }
 
 bool Plane::contain(const Line &line) const {
   if (!MathUtils::isZero(
           A * line.point.x + B * line.point.y + C * line.point.z + D,
           Vector{line.point.x, line.point.y, line.point.z}.length() *
-              (A + B + C) / 3))
+              (std::abs(A) + std::abs(B) + std::abs(C)) / 3))
     return false;
 
   if (MathUtils::isZero(line.direction * normal,
@@ -398,13 +389,6 @@ bool Triangle::checkIntersection(const Segment &seg) const {
     Segment thisSeg = Segment::maxLengthSegment(
         Segment{p1, p2}, Segment{p2, p3}, Segment{p1, p3});
     return Segment::checkIntersection(thisSeg, seg);
-
-    /*if (Line{thisSeg}.contain(seg))
-        return Segment::checkIntersection(thisSeg, seg);
-
-    if (Line{thisSeg}.getIntersection(seg).has_value() &&
-        Line{seg}.contain(thisSeg) ||
-    Line{seg}.getIntersection(thisSeg).has_value()) return true; return false;*/
   }
   case TRIANGLE:
     return checkIntersection(*this, seg);
