@@ -37,7 +37,7 @@ class Octree {
 public:
   Octree() {}
   Octree(const Octree &rhs) = delete;
-  Octree(Octree &rhs) = delete;
+  Octree(Octree &&rhs) = delete;
   Octree &operator=(const Octree &rhs) = delete;
   Octree &operator=(Octree &&rhs) = delete;
   ~Octree() { deleteTree(root); }
