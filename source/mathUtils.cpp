@@ -9,13 +9,6 @@ bool isZero(double number, double scale) {
   return std::abs(number) <= EPS * std::abs(scale);
 }
 
-bool nearEq(double a, double b, double absEps = 1e-12, double relEps = 1e-9) {
-  double diff = fabs(a - b);
-  if (diff <= absEps)
-    return true;
-  return diff <= relEps * std::max(fabs(a), fabs(b));
-}
-
 // a1 * x + a2 * y + a3 = 0
 // b1 * x + b2 * y + b3 = 0
 std::optional<std::pair<double, double>> solve2x2Equation(double a1, double a2,
