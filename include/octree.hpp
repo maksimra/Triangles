@@ -40,7 +40,7 @@ public:
   Octree(Octree &&rhs) = delete;
   Octree &operator=(const Octree &rhs) = delete;
   Octree &operator=(Octree &&rhs) = delete;
-  ~Octree() { deleteTree(root); }
+  ~Octree() { deleteOctree(root); }
 
   void insert(Geometry::Triangle *object) {
     assert(state == NOT_BUILT && "Insertion must precede tree construction");
@@ -64,7 +64,13 @@ public:
     if (boundingBoxSize > areaSize)
       areaSize = boundingBoxSize;
 
-    objects.push_back({object, objects.size()}); // triangle + triangle number
+    try {
+      objects.push_back({object, objects.size()}); // triangle + triangle number
+    }
+    catch (...) {
+      delete object;
+      throw;
+    }
   }
 
   void build() {
@@ -151,7 +157,7 @@ public:
       }
     }
     catch (...) {
-      delete tmpRoot;
+      deleteTree(tmpRoot);
       throw;
     }
 
@@ -211,24 +217,27 @@ private:
     }
   }
 
-  void deleteTree(Node *root) {
-    for (auto object : objects)
-      delete object.first;
-
-    if (root == nullptr)
+  void deleteTree(Node *node) noexcept {
+    if (node == nullptr)
       return;
 
-    std::queue<Node *> queue;
-    queue.push(root);
-    while (!queue.empty()) {
-      Node *node = queue.front();
-      queue.pop();
-
-      for (size_t i = 0; i < 8; i++) {
-        if (node->activeNodes & (1 << i))
-          queue.push(node->children[i]);
-      }
-      delete node;
+    for (size_t i = 0; i < 8; i++) {
+      if (node->activeNodes & (1 << i))
+        deleteTree(node->children[i]);
     }
+
+    for (auto object : node->objects)
+      delete object.first;
+
+    delete node;
   }
-};
+
+  void deleteOctree(Node *root) noexcept {
+    if (state == ALREADY_BUILT) {
+      deleteTree(root);
+      return;
+    }
+    for (auto object : objects)
+      delete object.first;
+  }
+};  
