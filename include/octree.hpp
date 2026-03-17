@@ -72,81 +72,90 @@ public:
 
     double boxSize = static_cast<double>(areaSize);
 
-    root =
-        new Node{/*prnt =*/nullptr,
-                 Geometry::Box{Geometry::Point{boxSize, boxSize, boxSize},
-                               Geometry::Point{-boxSize, -boxSize, -boxSize}},
-                 std::move(objects)};
+    Node *tmpRoot = nullptr;
+    try {
+      tmpRoot =
+          new Node{/*prnt =*/nullptr,
+                   Geometry::Box{Geometry::Point{boxSize, boxSize, boxSize},
+                                 Geometry::Point{-boxSize, -boxSize, -boxSize}},
+                   std::move(objects)};
 
-    auto getBox = [](const Geometry::Point &topRight, double boxSize) {
-      return Geometry::Box{topRight, Geometry::Point{topRight.x - boxSize,
-                                                     topRight.y - boxSize,
-                                                     topRight.z - boxSize}};
-    };
+      auto getBox = [](const Geometry::Point &topRight, double boxSize) {
+        return Geometry::Box{topRight, Geometry::Point{topRight.x - boxSize,
+                                                       topRight.y - boxSize,
+                                                       topRight.z - boxSize}};
+      };
 
-    std::queue<std::pair<Node *, double>> queue;
-    queue.push({root, boxSize});
+      std::queue<std::pair<Node *, double>> queue;
+      queue.push({tmpRoot, boxSize});
 
-    while (!queue.empty()) {
-      Node *currentNode = queue.front().first;
-      boxSize = queue.front().second;
-      queue.pop();
-      if (currentNode->objects.size() > typicalNodeCapacity &&
-          boxSize > minBoxSize) {
-        Geometry::Box box = currentNode->box;
-        Geometry::Point topRight = box.getTopRight();
-        Geometry::Box newBoxes[8] = {
-            getBox(box.getTopRight(), boxSize),
-            getBox(Geometry::Point{topRight.x - boxSize, topRight.y - boxSize,
-                                   topRight.z - boxSize},
-                   boxSize),
-            getBox(Geometry::Point{topRight.x - boxSize, topRight.y,
-                                   topRight.z - boxSize},
-                   boxSize),
-            getBox(Geometry::Point{topRight.x - boxSize, topRight.y - boxSize,
-                                   topRight.z},
-                   boxSize),
-            getBox(Geometry::Point{topRight.x, topRight.y - boxSize,
-                                   topRight.z - boxSize},
-                   boxSize),
-            getBox(
-                Geometry::Point{topRight.x - boxSize, topRight.y, topRight.z},
-                boxSize),
-            getBox(
-                Geometry::Point{topRight.x, topRight.y - boxSize, topRight.z},
-                boxSize),
-            getBox(
-                Geometry::Point{topRight.x, topRight.y, topRight.z - boxSize},
-                boxSize)};
+      while (!queue.empty()) {
+        Node *currentNode = queue.front().first;
+        boxSize = queue.front().second;
+        queue.pop();
+        if (currentNode->objects.size() > typicalNodeCapacity &&
+            boxSize > minBoxSize) {
+          Geometry::Box box = currentNode->box;
+          Geometry::Point topRight = box.getTopRight();
+          Geometry::Box newBoxes[8] = {
+              getBox(box.getTopRight(), boxSize),
+              getBox(Geometry::Point{topRight.x - boxSize, topRight.y - boxSize,
+                                     topRight.z - boxSize},
+                     boxSize),
+              getBox(Geometry::Point{topRight.x - boxSize, topRight.y,
+                                     topRight.z - boxSize},
+                     boxSize),
+              getBox(Geometry::Point{topRight.x - boxSize, topRight.y - boxSize,
+                                     topRight.z},
+                     boxSize),
+              getBox(Geometry::Point{topRight.x, topRight.y - boxSize,
+                                     topRight.z - boxSize},
+                     boxSize),
+              getBox(
+                  Geometry::Point{topRight.x - boxSize, topRight.y, topRight.z},
+                  boxSize),
+              getBox(
+                  Geometry::Point{topRight.x, topRight.y - boxSize, topRight.z},
+                  boxSize),
+              getBox(
+                  Geometry::Point{topRight.x, topRight.y, topRight.z - boxSize},
+                  boxSize)};
 
-        for (auto objectIt = currentNode->objects.begin();
-             objectIt != currentNode->objects.end();) {
-          Geometry::Triangle *object = (*objectIt).first;
-          bool boxFound = false;
-          for (size_t i = 0; i < 8; i++) {
-            if (newBoxes[i].contain(*object)) {
-              boxFound = true;
+          for (auto objectIt = currentNode->objects.begin();
+               objectIt != currentNode->objects.end();) {
+            Geometry::Triangle *object = (*objectIt).first;
+            bool boxFound = false;
+            for (size_t i = 0; i < 8; i++) {
+              if (newBoxes[i].contain(*object)) {
+                boxFound = true;
 
-              // if child node already created
-              if (currentNode->activeNodes & (1 << i)) {
+                // if child node already created
+                if (currentNode->activeNodes & (1 << i)) {
+                  currentNode->children[i]->objects.push_back(*objectIt);
+                  objectIt = currentNode->objects.erase(objectIt);
+                  break;
+                }
+
+                currentNode->children[i] = new Node{currentNode, newBoxes[i]};
+                currentNode->activeNodes += (1 << i);
+                queue.push({currentNode->children[i], boxSize / 2});
                 currentNode->children[i]->objects.push_back(*objectIt);
                 objectIt = currentNode->objects.erase(objectIt);
                 break;
               }
-
-              currentNode->children[i] = new Node{currentNode, newBoxes[i]};
-              currentNode->activeNodes += (1 << i);
-              queue.push({currentNode->children[i], boxSize / 2});
-              currentNode->children[i]->objects.push_back(*objectIt);
-              objectIt = currentNode->objects.erase(objectIt);
-              break;
             }
+            if (!boxFound)
+              ++objectIt;
           }
-          if (!boxFound)
-            ++objectIt;
         }
       }
     }
+    catch (...) {
+      delete tmpRoot;
+      throw;
+    }
+
+    root = tmpRoot;
     state = ALREADY_BUILT;
   }
 

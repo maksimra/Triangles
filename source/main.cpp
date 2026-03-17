@@ -1,5 +1,5 @@
 #include "geometry.hpp"
-#include "getting_value.hpp"
+#include "gettingValue.hpp"
 #include "octree.hpp"
 #include <iostream>
 #include <memory>
@@ -9,7 +9,7 @@
 int main() {
   try {
     size_t numberTriangles = 0;
-    get_smth_from_istream(&numberTriangles, std::cin);
+    getPositiveValFromIstream(&numberTriangles, std::cin);
 
     Octree octree{};
 

@@ -1,5 +1,5 @@
 #include "geometry.hpp"
-#include "getting_value.hpp"
+#include "gettingValue.hpp"
 #include "octree.hpp"
 #include <fstream>
 #include <gtest/gtest.h>
@@ -9,7 +9,7 @@ using namespace Geometry;
 void intersectionEndToEnd(std::fstream &testFile,
                           std::vector<size_t> &numKeysVec) {
   size_t numberTriangles = 0;
-  get_smth_from_istream(&numberTriangles, testFile);
+  getSmthFromIstream(&numberTriangles, testFile);
 
   Octree octree{};
 
