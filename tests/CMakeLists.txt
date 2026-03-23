@@ -29,7 +29,7 @@ target_link_libraries(
 )
 
 target_include_directories (unitTests PUBLIC ${PROJECT_SOURCE_DIR}
-                                         ${PROJECT_SOURCE_DIR}/include)
+                                             ${PROJECT_SOURCE_DIR}/include)
 
 gtest_discover_tests (unitTests)
 
